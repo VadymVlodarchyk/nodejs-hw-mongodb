@@ -3,6 +3,7 @@ import {
   getContactsController,
   getContactByIdController,
 } from '../controllers/contactsController.js';
+console.log('✅ contactsRouter loaded');
 
 const router = express.Router();
 
