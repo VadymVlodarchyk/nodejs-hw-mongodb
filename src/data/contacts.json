@@ -1,0 +1,73 @@
+[
+    {
+      "name": "Yulia Shevchenko",
+      "phoneNumber": "+380000000001",
+      "email": "oleh1@example.com",
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Dmytro Boyko",
+      "phoneNumber": "+380000000002",
+      "email": null,
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Andriy Pavlenko",
+      "phoneNumber": "+380000000003",
+      "email": "dmytro3@example.com",
+      "isFavourite": false,
+      "contactType": "home"
+    },
+    {
+      "name": "Yulia Shevchenko",
+      "phoneNumber": "+380000000004",
+      "email": null,
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Kateryna Povalenko",
+      "phoneNumber": "+380000000005",
+      "email": "ivan5@example.com",
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Anna Kovalenko",
+      "phoneNumber": "+380000000006",
+      "email": null,
+      "isFavourite": false,
+      "contactType": "home"
+    },
+    {
+      "name": "Oleh Tkachuk",
+      "phoneNumber": "+380000000007",
+      "email": "andriy7@example.com",
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Maria Petrenko",
+      "phoneNumber": "+380000000008",
+      "email": null,
+      "isFavourite": false,
+      "contactType": "personal"
+    },
+    {
+      "name": "Ivan Ivanenko",
+      "phoneNumber": "+380000000009",
+      "email": "vasyl9@example.com",
+      "isFavourite": false,
+      "contactType": "home"
+    },
+    {
+      "name": "Kateryna Kovalchuk",
+      "phoneNumber": "+380000000010",
+      "email": null,
+      "isFavourite": false,
+      "contactType": "personal"
+    }
+  ]
+  
