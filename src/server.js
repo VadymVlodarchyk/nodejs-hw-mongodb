@@ -1,26 +1,29 @@
 import express from 'express';
-import {
-  getContactsController,
-  getContactByIdController,
-  createContactController,
-  updateContactController,
-  deleteContactController,
-} from '../controllers/contacts.js';
+import cors from 'cors';
+import pino from 'pino-http';
 
-import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import contactsRouter from './routers/contacts.js';
+import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
-console.log('✅ contactsRouter loaded');
+console.log('✅ Registering /contacts route');
 
-const router = express.Router();
+export const setupServer = () => {
+  const app = express();
 
-router.get('/', ctrlWrapper(getContactsController));
+  app.use(cors());
+  app.use(pino());
+  app.use(express.json());
+  app.use('/contacts', contactsRouter);
+  app.get('/', (req, res) => {
+    res.send('API is live');
+  });
 
-router.get('/:contactId', ctrlWrapper(getContactByIdController));
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
-router.post('/', ctrlWrapper(createContactController));
-
-router.patch('/:contactId', ctrlWrapper(updateContactController));
-
-router.delete('/:contactId', ctrlWrapper(deleteContactController));
-
-export default router;
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+  });
+};
