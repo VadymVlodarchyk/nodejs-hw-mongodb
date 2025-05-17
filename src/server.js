@@ -15,13 +15,18 @@ export const setupServer = () => {
   app.use(pino());
   app.use(express.json());
 
+  // Основний маршрут для перевірки доступності
   app.get('/', (req, res) => {
-    res.send('API is live');
+    res.status(200).send('✅ Everything is working perfectly!');
   });
 
+  // Роут для контактів
   app.use('/contacts', contactsRouter);
 
+  // Обробка 404 після всіх маршрутів
   app.use(notFoundHandler);
+
+  // Обробка помилок
   app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
