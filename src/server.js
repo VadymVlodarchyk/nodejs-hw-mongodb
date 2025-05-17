@@ -15,7 +15,15 @@ export const setupServer = () => {
   app.use(pino());
   app.use(express.json());
 
-  // Основний маршрут для перевірки доступності
+  // Тестовий маршрут
+  app.get('/test', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      message: '🔥 This is /test route. Server is definitely working.',
+    });
+  });
+
+  // Кореневий маршрут
   app.get('/', (req, res) => {
     res.status(200).send('✅ Everything is working perfectly!');
   });
@@ -23,7 +31,7 @@ export const setupServer = () => {
   // Роут для контактів
   app.use('/contacts', contactsRouter);
 
-  // Обробка 404 після всіх маршрутів
+  // Обробка 404
   app.use(notFoundHandler);
 
   // Обробка помилок
