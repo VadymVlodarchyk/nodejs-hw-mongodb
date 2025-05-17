@@ -1,24 +1,26 @@
 import express from 'express';
-import cors from 'cors';
-import pino from 'pino-http';
+import {
+  getContactsController,
+  getContactByIdController,
+  createContactController,
+  updateContactController,
+  deleteContactController,
+} from '../controllers/contacts.js';
 
-import contactsRouter from './routers/contacts.js';
-import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
-console.log('✅ Registering /contacts route');
+console.log('✅ contactsRouter loaded');
 
-export const setupServer = () => {
-  const app = express();
+const router = express.Router();
 
-  app.use(cors());
-  app.use(pino());
-  app.use(express.json());
-  app.use('/contacts', contactsRouter);
-  app.use(notFoundHandler);
-  app.use(errorHandler);
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`✅ Server is running on port ${PORT}`);
-  });
-};
+router.get('/', ctrlWrapper(getContactsController));
+
+router.get('/:contactId', ctrlWrapper(getContactByIdController));
+
+router.post('/', ctrlWrapper(createContactController));
+
+router.patch('/:contactId', ctrlWrapper(updateContactController));
+
+router.delete('/:contactId', ctrlWrapper(deleteContactController));
+
+export default router;
