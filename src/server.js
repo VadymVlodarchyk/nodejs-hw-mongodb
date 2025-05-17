@@ -15,9 +15,8 @@ export const setupServer = () => {
   app.use(pino());
   app.use(express.json());
 
-  
   app.get('/', (req, res) => {
-    res.send('API is live ✅');
+    res.send('API is live');
   });
 
   app.use('/contacts', contactsRouter);
