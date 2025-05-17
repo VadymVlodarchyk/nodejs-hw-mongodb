@@ -6,10 +6,7 @@ import {
   updateContactController,
   deleteContactController,
 } from '../controllers/contacts.js';
-
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-
-console.log('✅ contactsRouter loaded');
 
 const router = express.Router();
 

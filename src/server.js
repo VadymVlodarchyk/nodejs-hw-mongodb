@@ -14,10 +14,13 @@ export const setupServer = () => {
   app.use(cors());
   app.use(pino());
   app.use(express.json());
-  app.use('/contacts', contactsRouter);
+
+  
   app.get('/', (req, res) => {
-    res.send('API is live');
+    res.send('API is live ✅');
   });
+
+  app.use('/contacts', contactsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
