@@ -1,23 +1,53 @@
 import mongoose from 'mongoose';
 import createError from 'http-errors';
-
 import {
-  getAllContacts,
   getContactById,
   addContact,
   updateContactById,
   deleteContactById,
 } from '../services/contacts.js';
+import { Contact } from '../models/contactModel.js'; // Потрібен для пагінації
 
+// ✅ ОНОВЛЕНИЙ
 export const getContactsController = async (req, res) => {
-  const contacts = await getAllContacts();
+  const {
+    page = 1,
+    perPage = 10,
+    sortBy = 'name',
+    sortOrder = 'asc',
+    type,
+    isFavourite,
+  } = req.query;
+
+  const skip = (page - 1) * perPage;
+  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+
+  const filter = {};
+  if (type) filter.contactType = type;
+  if (isFavourite !== undefined) filter.isFavourite = isFavourite === 'true';
+
+  const totalItems = await Contact.countDocuments(filter);
+  const contacts = await Contact.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(Number(perPage));
+
   res.status(200).json({
     status: 200,
     message: 'Successfully found contacts!',
-    data: contacts,
+    data: {
+      data: contacts,
+      page: Number(page),
+      perPage: Number(perPage),
+      totalItems,
+      totalPages: Math.ceil(totalItems / perPage),
+      hasPreviousPage: Number(page) > 1,
+      hasNextPage: skip + contacts.length < totalItems,
+    },
   });
 };
 
+// Інші контролери — без змін:
 export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(contactId)) {
