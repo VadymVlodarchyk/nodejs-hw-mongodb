@@ -1,14 +1,14 @@
 import mongoose from 'mongoose';
 import createError from 'http-errors';
+
 import {
+  getAllContacts,
   getContactById,
   addContact,
   updateContactById,
   deleteContactById,
 } from '../services/contacts.js';
-import { Contact } from '../models/contactModel.js'; // Потрібен для пагінації
 
-// ✅ ОНОВЛЕНИЙ
 export const getContactsController = async (req, res) => {
   const {
     page = 1,
@@ -26,11 +26,14 @@ export const getContactsController = async (req, res) => {
   if (type) filter.contactType = type;
   if (isFavourite !== undefined) filter.isFavourite = isFavourite === 'true';
 
-  const totalItems = await Contact.countDocuments(filter);
-  const contacts = await Contact.find(filter)
-    .sort(sort)
-    .skip(skip)
-    .limit(Number(perPage));
+  const userId = req.user._id;
+
+  const totalItems = await getAllContacts(userId, filter).then(data => data.length);
+  const contacts = await getAllContacts(userId, filter, {
+    sort,
+    skip,
+    limit: Number(perPage),
+  });
 
   res.status(200).json({
     status: 200,
@@ -47,14 +50,14 @@ export const getContactsController = async (req, res) => {
   });
 };
 
-// Інші контролери — без змін:
 export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(contactId)) {
     throw createError(400, 'Invalid contact ID format');
   }
 
-  const contact = await getContactById(contactId.trim());
+  const contact = await getContactById(contactId.trim(), req.user._id);
   if (!contact) {
     throw createError(404, 'Contact not found');
   }
@@ -79,6 +82,7 @@ export const createContactController = async (req, res) => {
     contactType,
     email,
     isFavourite,
+    userId: req.user._id,
   });
 
   res.status(201).json({
@@ -90,11 +94,12 @@ export const createContactController = async (req, res) => {
 
 export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(contactId)) {
     throw createError(400, 'Invalid contact ID format');
   }
 
-  const updatedContact = await updateContactById(contactId.trim(), req.body);
+  const updatedContact = await updateContactById(contactId.trim(), req.user._id, req.body);
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
@@ -108,11 +113,12 @@ export const updateContactController = async (req, res) => {
 
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(contactId)) {
     throw createError(400, 'Invalid contact ID format');
   }
 
-  const result = await deleteContactById(contactId.trim());
+  const result = await deleteContactById(contactId.trim(), req.user._id);
   if (!result) {
     throw createError(404, 'Contact not found');
   }
