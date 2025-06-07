@@ -1,6 +1,6 @@
 import createError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/user.js';
+import { User } from '../models/userModel.js';
 import { sendEmail } from '../services/email.js';
 import {
   registerUser,
