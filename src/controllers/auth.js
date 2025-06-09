@@ -13,7 +13,6 @@ const { JWT_SECRET, APP_DOMAIN } = process.env;
 
 export const registerController = async (req, res) => {
   const { name, email, password } = req.body;
-
   const newUser = await registerUser({ name, email, password });
 
   res.status(201).json({
@@ -30,14 +29,13 @@ export const registerController = async (req, res) => {
 
 export const loginController = async (req, res) => {
   const { email, password } = req.body;
-
   const { accessToken, refreshToken } = await loginUser({ email, password });
 
   res
     .cookie('refreshToken', refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 днів
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     })
     .status(200)
     .json({
@@ -49,23 +47,14 @@ export const loginController = async (req, res) => {
 
 export const logoutController = async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
-
-  if (!refreshToken) {
-    throw createError(401, 'Not authorized');
-  }
-
+  if (!refreshToken) throw createError(401, 'Not authorized');
   await logoutUser(refreshToken);
-
   res.clearCookie('refreshToken').status(204).send();
 };
 
 export const refreshSessionController = async (req, res) => {
   const oldRefreshToken = req.cookies?.refreshToken;
-
-  if (!oldRefreshToken) {
-    throw createError(401, 'Not authorized');
-  }
-
+  if (!oldRefreshToken) throw createError(401, 'Not authorized');
   const { accessToken, refreshToken } = await refreshSession(oldRefreshToken);
 
   res
@@ -86,29 +75,27 @@ export const sendResetEmail = async (req, res) => {
   const { email } = req.body;
 
   const user = await User.findOne({ email });
-  if (!user) {
-    throw createError(404, 'User not found!');
-  }
+  if (!user) throw createError(404, 'User not found!');
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '5m' });
-
+  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '10m' });
   const resetLink = `${APP_DOMAIN}/reset-password?token=${token}`;
 
-  const emailOptions = {
+  const isSent = await sendEmail({
     to: email,
     subject: 'Reset your password',
-    html: `<p>To reset your password, click the link below:</p><a href="${resetLink}">${resetLink}</a>`,
-  };
+    html: `
+      <p>Hello,</p>
+      <p>To reset your password, click the link below:</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>This link is valid for 10 minutes.</p>
+    `,
+  });
 
-  const isSent = await sendEmail(emailOptions);
-
-  if (!isSent) {
-    throw createError(500, 'Failed to send the email, please try again later.');
-  }
+  if (!isSent) throw createError(500, 'Email not sent, please try again later.');
 
   res.status(200).json({
     status: 200,
-    message: 'Reset password email has been successfully sent.',
+    message: 'Reset password email sent successfully.',
     data: {},
   });
 };
@@ -116,26 +103,21 @@ export const sendResetEmail = async (req, res) => {
 export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
-  let email;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    email = decoded.email;
-  } catch {
+    const { email } = jwt.verify(token, JWT_SECRET);
+
+    const user = await User.findOne({ email });
+    if (!user) throw createError(404, 'User not found!');
+
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({
+      status: 200,
+      message: 'Password has been successfully reset.',
+      data: {},
+    });
+  } catch (error) {
     throw createError(401, 'Token is expired or invalid.');
   }
-
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw createError(404, 'User not found!');
-  }
-
-  user.password = password;
-  user.token = null; 
-  await user.save();
-
-  res.status(200).json({
-    status: 200,
-    message: 'Password has been successfully reset.',
-    data: {},
-  });
 };
