@@ -70,29 +70,46 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
-  const { name, phoneNumber, contactType, email, isFavourite } = req.body;
+  try {
+    console.log('🟨 req.body:', req.body);
+    console.log('🟨 req.file:', req.file);
+    console.log('🟨 req.user:', req.user);
 
-  if (!name || !phoneNumber || !contactType) {
-    throw createError(400, 'Missing required fields: name, phoneNumber, contactType');
+    const { name, phoneNumber, contactType, email, isFavourite } = req.body;
+
+    if (!name || !phoneNumber || !contactType) {
+      throw createError(400, 'Missing required fields: name, phoneNumber, contactType');
+    }
+
+    const photo = req.file?.path || req.file?.url || '';
+
+    const newContactData = {
+      name,
+      phoneNumber,
+      contactType,
+      email,
+      isFavourite: String(isFavourite).toLowerCase() === 'true',
+      userId: new mongoose.Types.ObjectId(req.user._id),
+      photo,
+    };
+
+    console.log('🧪 Спроба створити контакт з даними:', newContactData);
+
+    const newContact = await addContact(newContactData);
+
+    res.status(201).json({
+      status: 201,
+      message: 'Successfully created a contact!',
+      data: newContact,
+    });
+  } catch (error) {
+    console.error('❌ FULL ERROR:', error);
+    res.status(500).json({
+      status: 500,
+      message: 'Something went wrong',
+      data: error.stack || error.message || 'Internal Server Error',
+    });
   }
-
-  const photo = req.file?.path || '';
-
-  const newContact = await addContact({
-    name,
-    phoneNumber,
-    contactType,
-    email,
-    isFavourite,
-    userId: req.user._id,
-    photo,
-  });
-
-  res.status(201).json({
-    status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
-  });
 };
 
 export const updateContactController = async (req, res) => {
@@ -104,8 +121,8 @@ export const updateContactController = async (req, res) => {
 
   const updateData = { ...req.body };
 
-  if (req.file?.path) {
-    updateData.photo = req.file.path;
+  if (req.file?.path || req.file?.url) {
+    updateData.photo = req.file?.path || req.file?.url;
   }
 
   const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
@@ -122,10 +139,6 @@ export const updateContactController = async (req, res) => {
 
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    throw createError(400, 'Invalid contact ID format');
-  }
 
   const result = await deleteContactById(contactId.trim(), req.user._id);
   if (!result) {

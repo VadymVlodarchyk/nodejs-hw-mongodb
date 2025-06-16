@@ -1,6 +1,6 @@
+import '../config/env.js'; // 🔁 підключаємо конфіг глобально
 import jwt from 'jsonwebtoken';
 import createError from 'http-errors';
-import { Session } from '../models/sessionModel.js';
 import { User } from '../models/userModel.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
@@ -15,17 +15,14 @@ export const authenticate = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    console.log('✅ decoded JWT:', decoded);
 
-    const session = await Session.findOne({ accessToken: token });
-    if (!session) {
-      throw createError(401, 'Invalid session');
+    const userId = decoded.userId || decoded._id;
+    if (!userId) {
+      throw createError(401, 'Invalid token payload');
     }
 
-    if (session.accessTokenValidUntil < new Date()) {
-      throw createError(401, 'Access token expired');
-    }
-
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await User.findById(userId).select('-password');
     if (!user) {
       throw createError(401, 'User not found');
     }
@@ -33,6 +30,7 @@ export const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
+    console.error('❌ Auth error:', error.message);
     next(createError(401, error.message || 'Unauthorized'));
   }
 };

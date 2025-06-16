@@ -5,13 +5,17 @@ const contactSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     phoneNumber: {
       type: String,
       required: true,
+      trim: true,
     },
     email: {
       type: String,
+      trim: true,
+      required: false,
     },
     isFavourite: {
       type: Boolean,
@@ -29,8 +33,9 @@ const contactSchema = new mongoose.Schema(
       required: true,
     },
     photo: {
-      type: String, 
+      type: String,
       default: '',
+      required: false,
     },
   },
   {
