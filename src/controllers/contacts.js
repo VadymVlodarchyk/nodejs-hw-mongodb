@@ -71,10 +71,6 @@ export const getContactByIdController = async (req, res) => {
 
 export const createContactController = async (req, res) => {
   try {
-    console.log('🟨 req.body:', req.body);
-    console.log('🟨 req.file:', req.file);
-    console.log('🟨 req.user:', req.user);
-
     const { name, phoneNumber, contactType, email, isFavourite } = req.body;
 
     if (!name || !phoneNumber || !contactType) {
@@ -89,11 +85,9 @@ export const createContactController = async (req, res) => {
       contactType,
       email,
       isFavourite: String(isFavourite).toLowerCase() === 'true',
-      userId: new mongoose.Types.ObjectId(req.user._id),
+      userId: req.user._id,
       photo,
     };
-
-    console.log('🧪 Спроба створити контакт з даними:', newContactData);
 
     const newContact = await addContact(newContactData);
 
@@ -122,7 +116,7 @@ export const updateContactController = async (req, res) => {
   const updateData = { ...req.body };
 
   if (req.file?.path || req.file?.url) {
-    updateData.photo = req.file?.path || req.file?.url;
+    updateData.photo = req.file.path || req.file.url;
   }
 
   const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
