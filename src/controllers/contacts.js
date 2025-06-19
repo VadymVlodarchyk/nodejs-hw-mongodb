@@ -98,7 +98,7 @@ export const createContactController = async (req, res) => {
       data: newContact,
     });
   } catch (error) {
-    console.error('❌ CREATE error:', error.stack || error.message);
+    console.error('❌ CREATE error:', error);
     res.status(500).json({
       status: 500,
       message: 'Something went wrong',
@@ -115,18 +115,19 @@ export const updateContactController = async (req, res) => {
       throw createError(400, 'Invalid contact ID format');
     }
 
+    if (!req.user || !req.user._id) {
+      throw createError(401, 'Unauthorized: missing user ID');
+    }
+
     const updateData = { ...req.body };
-    console.log('📥 PATCH body:', req.body);
     console.log('📸 PATCH file:', req.file);
-    console.log('👤 PATCH user:', req.user);
+    console.log('🛠 PATCH updateData before file check:', updateData);
 
     if (req.file && (req.file.path || req.file.url)) {
       updateData.photo = req.file.path || req.file.url;
     }
 
-    if (Object.keys(updateData).length === 0) {
-      throw createError(400, 'No data provided for update');
-    }
+    console.log('🛠 PATCH final updateData:', updateData);
 
     const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
     if (!updatedContact) {
@@ -139,7 +140,7 @@ export const updateContactController = async (req, res) => {
       data: updatedContact,
     });
   } catch (error) {
-    console.error('❌ PATCH error:', error.stack || error.message);
+    console.error('❌ PATCH error:', error);
     res.status(500).json({
       status: 500,
       message: 'Something went wrong',
@@ -149,25 +150,12 @@ export const updateContactController = async (req, res) => {
 };
 
 export const deleteContactController = async (req, res) => {
-  try {
-    const { contactId } = req.params;
+  const { contactId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      throw createError(400, 'Invalid contact ID format');
-    }
-
-    const result = await deleteContactById(contactId.trim(), req.user._id);
-    if (!result) {
-      throw createError(404, 'Contact not found');
-    }
-
-    res.status(204).send();
-  } catch (error) {
-    console.error('❌ DELETE error:', error.stack || error.message);
-    res.status(500).json({
-      status: 500,
-      message: 'Something went wrong',
-      data: error.stack || error.message || 'Internal Server Error',
-    });
+  const result = await deleteContactById(contactId.trim(), req.user._id);
+  if (!result) {
+    throw createError(404, 'Contact not found');
   }
+
+  res.status(204).send();
 };
