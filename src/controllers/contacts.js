@@ -117,7 +117,7 @@ export const updateContactController = async (req, res) => {
 
     const updateData = { ...req.body };
 
-    console.log('📸 PATCH file:', req.file); // ← це ми побачимо в логах Render
+    console.log('📸 PATCH file:', req.file); // лог для Render
 
     if (req.file?.path || req.file?.url) {
       updateData.photo = req.file.path || req.file.url;
