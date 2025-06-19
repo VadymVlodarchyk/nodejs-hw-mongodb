@@ -117,13 +117,14 @@ export const updateContactController = async (req, res) => {
 
     const updateData = { ...req.body };
 
-    console.log('📸 PATCH file:', req.file); // лог для Render
+    console.log('📸 PATCH file:', req.file); // ← лог буде на Render
 
-    if (req.file?.path || req.file?.url) {
+    if (req.file && (req.file.path || req.file.url)) {
       updateData.photo = req.file.path || req.file.url;
     }
 
     const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
+
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
     }
