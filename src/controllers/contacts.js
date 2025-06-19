@@ -107,32 +107,45 @@ export const createContactController = async (req, res) => {
 };
 
 export const updateContactController = async (req, res) => {
-  const { contactId } = req.params;
+  try {
+    const { contactId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
-    throw createError(400, 'Invalid contact ID format');
+    console.log('📍 PATCH INITIATED for contactId:', contactId);
+    console.log('🟨 req.body:', req.body);
+    console.log('🟦 req.file:', req.file);
+    console.log('🧾 req.user:', req.user);
+
+    if (!mongoose.Types.ObjectId.isValid(contactId)) {
+      throw createError(400, 'Invalid contact ID format');
+    }
+
+    const updateData = { ...req.body };
+
+    if (req.file?.path || req.file?.url) {
+      updateData.photo = req.file?.path || req.file?.url;
+    }
+
+    const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
+
+    if (!updatedContact) {
+      throw createError(404, 'Contact not found');
+    }
+
+    console.log('✅ PATCH SUCCESSFUL:', updatedContact);
+
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully patched a contact!',
+      data: updatedContact,
+    });
+  } catch (error) {
+    console.error('❌ PATCH ERROR:', error);
+    res.status(500).json({
+      status: 500,
+      message: 'Something went wrong',
+      data: error.stack || error.message || 'Internal Server Error',
+    });
   }
-
-  // 🔍 Додаємо логування для відладки
-  console.log('🧩 PATCH body:', req.body);
-  console.log('🧩 PATCH file:', req.file);
-
-  const updateData = { ...req.body };
-
-  if (req.file?.path || req.file?.url) {
-    updateData.photo = req.file.path || req.file.url;
-  }
-
-  const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
-  if (!updatedContact) {
-    throw createError(404, 'Contact not found');
-  }
-
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully patched a contact!',
-    data: updatedContact,
-  });
 };
 
 export const deleteContactController = async (req, res) => {
