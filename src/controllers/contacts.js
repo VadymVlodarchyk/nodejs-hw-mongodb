@@ -115,14 +115,13 @@ export const updateContactController = async (req, res) => {
 
   const updateData = { ...req.body };
 
-  console.log('🧩 PATCH Debug — req.file:', req.file);
-  console.log('🧩 PATCH Debug — updateData before file attach:', updateData);
+  // Додано для діагностики
+  console.log('🧾 PATCH body:', req.body);
+  console.log('📸 PATCH file:', req.file);
 
   if (req.file?.path || req.file?.url) {
     updateData.photo = req.file.path || req.file.url;
   }
-
-  console.log('🧩 PATCH Debug — updateData after file attach:', updateData);
 
   const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
   if (!updatedContact) {
