@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config(); // ⬅️ Обовʼязково на самому початку
+dotenv.config();
 
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -21,10 +21,13 @@ console.log('📸 Cloudinary configured with:', CLOUDINARY_CLOUD_NAME);
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'contacts',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }],
+  params: async (req, file) => {
+    return {
+      folder: 'contacts',
+      allowed_formats: ['jpg', 'jpeg', 'png'],
+      public_id: file.originalname.split('.')[0], // щоб уникнути конфліктів
+      transformation: [{ width: 500, height: 500, crop: 'limit' }],
+    };
   },
 });
 
