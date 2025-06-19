@@ -107,41 +107,32 @@ export const createContactController = async (req, res) => {
 };
 
 export const updateContactController = async (req, res) => {
-  try {
-    console.log('🔁 PATCH BODY:', req.body);
-    console.log('🔁 PATCH FILE:', req.file);
-    console.log('🔁 PATCH USER:', req.user);
+  const { contactId } = req.params;
 
-    const { contactId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(contactId)) {
-      throw createError(400, 'Invalid contact ID format');
-    }
-
-    const updateData = { ...req.body };
-
-    if (req.file?.path || req.file?.url) {
-      updateData.photo = req.file?.path || req.file?.url;
-    }
-
-    const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
-    if (!updatedContact) {
-      throw createError(404, 'Contact not found');
-    }
-
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully patched a contact!',
-      data: updatedContact,
-    });
-  } catch (error) {
-    console.error('🔥 PATCH ERROR:', error);
-    res.status(500).json({
-      status: 500,
-      message: 'Something went wrong',
-      data: error.stack || error.message || 'Internal Server Error',
-    });
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+    throw createError(400, 'Invalid contact ID format');
   }
+
+  // 🔍 Додаємо логування для відладки
+  console.log('🧩 PATCH body:', req.body);
+  console.log('🧩 PATCH file:', req.file);
+
+  const updateData = { ...req.body };
+
+  if (req.file?.path || req.file?.url) {
+    updateData.photo = req.file.path || req.file.url;
+  }
+
+  const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
+  if (!updatedContact) {
+    throw createError(404, 'Contact not found');
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully patched a contact!',
+    data: updatedContact,
+  });
 };
 
 export const deleteContactController = async (req, res) => {
