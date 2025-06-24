@@ -10,7 +10,7 @@ import {
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
-import { upload } from '../services/cloudinary.js';
+import { uploadSingle } from '../middlewares/upload.js'; // ✅ новий middleware
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.get('/:contactId', authenticate, isValidId, ctrlWrapper(getContactByIdCon
 router.post(
   '/',
   authenticate,
-  upload.single('photo'),
+  uploadSingle,
   ctrlWrapper(createContactController)
 );
 
@@ -29,7 +29,7 @@ router.patch(
   '/:contactId',
   authenticate,
   isValidId,
-  upload.single('photo'),
+  uploadSingle,
   ctrlWrapper(updateContactController)
 );
 

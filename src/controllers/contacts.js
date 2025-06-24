@@ -120,16 +120,21 @@ export const updateContactController = async (req, res) => {
     }
 
     const updateData = { ...req.body };
-    console.log('📸 PATCH file:', req.file);
-    console.log('🛠 PATCH updateData before file check:', updateData);
 
-    if (req.file && (req.file.path || req.file.url)) {
-      updateData.photo = req.file.path || req.file.url;
+    console.log('🧩 PATCH req.file:', req.file);
+
+    if (req.file) {
+      const { path, url, filename } = req.file;
+      const photoUrl = path || url || filename;
+      if (photoUrl) {
+        updateData.photo = photoUrl;
+      } else {
+        console.warn('⚠️ Photo not found in file object');
+      }
     }
 
-    console.log('🛠 PATCH final updateData:', updateData);
-
     const updatedContact = await updateContactById(contactId.trim(), req.user._id, updateData);
+
     if (!updatedContact) {
       throw createError(404, 'Contact not found');
     }
@@ -148,6 +153,7 @@ export const updateContactController = async (req, res) => {
     });
   }
 };
+
 
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
