@@ -121,15 +121,14 @@ export const updateContactController = async (req, res) => {
 
     const updateData = { ...req.body };
 
-    console.log('🧩 PATCH req.file:', req.file);
+    console.log('🧩 PATCH req.body:', req.body);
+    console.log('🖼️ PATCH req.file:', req.file);
 
     if (req.file) {
       const { path, url, filename } = req.file;
       const photoUrl = path || url || filename;
       if (photoUrl) {
         updateData.photo = photoUrl;
-      } else {
-        console.warn('⚠️ Photo not found in file object');
       }
     }
 
@@ -153,7 +152,6 @@ export const updateContactController = async (req, res) => {
     });
   }
 };
-
 
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
