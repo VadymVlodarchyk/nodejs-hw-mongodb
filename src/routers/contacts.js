@@ -9,7 +9,7 @@ import {
 import { authenticate } from '../middlewares/authenticate.js';
 import { uploadSingle } from '../middlewares/upload.js';
 import { validateBody } from '../middlewares/validateBody.js';
-import { contactSchema } from '../validation/contactSchema.js';
+import { contactSchema } from '../validation/contactSchemas.js';
 
 const router = express.Router();
 
