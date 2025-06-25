@@ -5,7 +5,6 @@ import { Contact } from '../models/contactModel.js';
 
 dotenv.config();
 
-// Зчитуємо файл контактів
 const contactsRaw = await readFile(
   new URL('../data/contacts.json', import.meta.url),
   'utf-8'

@@ -1,4 +1,4 @@
-import './config/env.js'; // 🔁 ЄДИНИЙ імпорт dotenv
+import './config/env.js';
 import { setupServer } from './server.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
 

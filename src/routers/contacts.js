@@ -1,38 +1,24 @@
 import express from 'express';
 import {
-  getContactsController,
-  getContactByIdController,
-  createContactController,
-  updateContactController,
-  deleteContactController,
+  getAllContacts,
+  getContactById,
+  addContact,
+  updateContact,
+  deleteContact,
 } from '../controllers/contacts.js';
-
-import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
-import { uploadSingle } from '../middlewares/upload.js'; // ✅ новий middleware
+import { uploadSingle } from '../middlewares/upload.js';
+import { validateBody } from '../middlewares/validateBody.js';
+import { contactSchema } from '../validation/contactSchema.js';
 
 const router = express.Router();
 
-router.get('/', authenticate, ctrlWrapper(getContactsController));
+router.use(authenticate);
 
-router.get('/:contactId', authenticate, isValidId, ctrlWrapper(getContactByIdController));
-
-router.post(
-  '/',
-  authenticate,
-  uploadSingle,
-  ctrlWrapper(createContactController)
-);
-
-router.patch(
-  '/:contactId',
-  authenticate,
-  isValidId,
-  uploadSingle,
-  ctrlWrapper(updateContactController)
-);
-
-router.delete('/:contactId', authenticate, isValidId, ctrlWrapper(deleteContactController));
+router.get('/', getAllContacts);
+router.get('/:contactId', getContactById);
+router.post('/', uploadSingle, validateBody(contactSchema), addContact);
+router.patch('/:contactId', uploadSingle, validateBody(contactSchema), updateContact);
+router.delete('/:contactId', deleteContact);
 
 export default router;

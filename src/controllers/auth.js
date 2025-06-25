@@ -1,5 +1,6 @@
 import createError from 'http-errors';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { User } from '../models/userModel.js';
 import { sendEmail } from '../services/email.js';
 import {
@@ -40,7 +41,7 @@ export const loginController = async (req, res) => {
     .status(200)
     .json({
       status: 200,
-      message: 'Successfully logged in an user!',
+      message: 'Successfully logged in a user!',
       data: { accessToken },
     });
 };
@@ -77,7 +78,7 @@ export const sendResetEmail = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) throw createError(404, 'User not found!');
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '10m' });
+  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '5m' });
   const resetLink = `${APP_DOMAIN}/reset-password?token=${token}`;
 
   const isSent = await sendEmail({
@@ -87,7 +88,7 @@ export const sendResetEmail = async (req, res) => {
       <p>Hello,</p>
       <p>To reset your password, click the link below:</p>
       <a href="${resetLink}">${resetLink}</a>
-      <p>This link is valid for 10 minutes.</p>
+      <p>This link is valid for 5 minutes.</p>
     `,
   });
 
@@ -109,7 +110,9 @@ export const resetPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) throw createError(404, 'User not found!');
 
-    user.password = password;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
     await user.save();
 
     res.status(200).json({
