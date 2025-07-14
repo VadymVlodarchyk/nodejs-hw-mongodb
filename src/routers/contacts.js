@@ -28,6 +28,7 @@ router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
 
 router.post(
   '/',
+  upload.single('photo'), 
   validateBody(createContactSchema),
   ctrlWrapper(createContactController)
 );
@@ -35,7 +36,7 @@ router.post(
 router.patch(
   '/:contactId',
   isValidId,
-  upload.fields([{ name: 'avatar', maxCount: 1 }]), // ✅ дозволено поле avatar
+  upload.single('photo'), 
   validateBody(updateContactSchema),
   ctrlWrapper(updateContactController)
 );
