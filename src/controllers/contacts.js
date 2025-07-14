@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import createError from 'http-errors';
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs/promises';
 
 import {
   getAllContacts,
@@ -76,17 +78,25 @@ export const createContactController = async (req, res) => {
     throw createError(400, 'Missing required fields: name, phoneNumber, contactType');
   }
 
-  const newContact = await addContact(
-    {
-      name,
-      phoneNumber,
-      contactType,
-      email,
-      isFavourite,
-      userId: req.user._id,
-    },
-    req.file // image
-  );
+  let photoUrl = null;
+
+  if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'contacts',
+    });
+    photoUrl = result.secure_url;
+    await fs.unlink(req.file.path); // видаляємо файл із tmp
+  }
+
+  const newContact = await addContact({
+    name,
+    phoneNumber,
+    contactType,
+    email,
+    isFavourite,
+    photo: photoUrl,
+    userId: req.user._id,
+  });
 
   res.status(201).json({
     status: 201,
@@ -102,11 +112,25 @@ export const updateContactController = async (req, res) => {
     throw createError(400, 'Invalid contact ID format');
   }
 
+  let photoUrl;
+
+  if (req.file) {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'contacts',
+    });
+    photoUrl = result.secure_url;
+    await fs.unlink(req.file.path);
+  }
+
+  const updateData = { ...req.body };
+  if (photoUrl) {
+    updateData.photo = photoUrl;
+  }
+
   const updatedContact = await updateContactById(
     contactId.trim(),
     req.user._id,
-    req.body,
-    req.file // image
+    updateData
   );
 
   if (!updatedContact) {

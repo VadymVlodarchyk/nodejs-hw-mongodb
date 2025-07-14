@@ -23,13 +23,14 @@ const contactSchema = new mongoose.Schema(
       default: 'personal',
       required: true,
     },
-    photo: {
-      type: String, // посилання на зображення з Cloudinary
-    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+    },
+    photo: {
+      type: String, 
+      default: '',
     },
   },
   {
