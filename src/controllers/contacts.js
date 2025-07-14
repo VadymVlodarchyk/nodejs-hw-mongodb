@@ -76,14 +76,17 @@ export const createContactController = async (req, res) => {
     throw createError(400, 'Missing required fields: name, phoneNumber, contactType');
   }
 
-  const newContact = await addContact({
-    name,
-    phoneNumber,
-    contactType,
-    email,
-    isFavourite,
-    userId: req.user._id,
-  });
+  const newContact = await addContact(
+    {
+      name,
+      phoneNumber,
+      contactType,
+      email,
+      isFavourite,
+      userId: req.user._id,
+    },
+    req.file // image
+  );
 
   res.status(201).json({
     status: 201,
@@ -99,7 +102,13 @@ export const updateContactController = async (req, res) => {
     throw createError(400, 'Invalid contact ID format');
   }
 
-  const updatedContact = await updateContactById(contactId.trim(), req.user._id, req.body);
+  const updatedContact = await updateContactById(
+    contactId.trim(),
+    req.user._id,
+    req.body,
+    req.file // image
+  );
+
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }

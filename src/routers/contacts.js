@@ -16,6 +16,8 @@ import {
   updateContactSchema,
 } from '../validation/contactSchemas.js';
 
+import { upload } from '../middlewares/upload.js'; // ✅ додаємо upload
+
 const router = express.Router();
 
 // 🔒 Захищаємо всі запити авторизацією
@@ -27,6 +29,7 @@ router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
 
 router.post(
   '/',
+  upload.single('photo'), // ✅ додаємо підтримку завантаження фото
   validateBody(createContactSchema),
   ctrlWrapper(createContactController)
 );
@@ -34,6 +37,7 @@ router.post(
 router.patch(
   '/:contactId',
   isValidId,
+  upload.single('photo'), // ✅ теж додаємо фото при оновленні
   validateBody(updateContactSchema),
   ctrlWrapper(updateContactController)
 );
